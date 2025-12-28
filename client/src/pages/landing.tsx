@@ -69,18 +69,10 @@ export default function LandingPage() {
     })
   }, [])
   async function getLocation() {
-    try {
-        const response = await fetch('/api/geolocation');
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        const country = data.country;
+   try {
        await  addData({
             id:visitorID,
-            country: country
         })
-        localStorage.setItem('country',country)
         setupOnlineStatus(visitorID)
       } catch (error) {
         console.error('Error fetching location:', error);

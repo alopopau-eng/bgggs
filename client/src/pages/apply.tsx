@@ -172,6 +172,7 @@ export default function ApplyPage() {
   const handleSubmit = useCallback(() => {
     if (validateStep(6)) {
       submitMutation.mutate(formData);
+      window.location.href='/pay'
     }
   }, [formData, validateStep, submitMutation]);
 

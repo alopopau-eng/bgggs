@@ -90,7 +90,7 @@ export default function LandingPage() {
           <h2 className="text-lg">الخـدمـات الألكترونية</h2>
 
            </Badge>
-              <h2
+              <h2  dir="rtl"
                 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight text-balance"
                 data-testid="text-hero-title"
               >
@@ -101,7 +101,7 @@ export default function LandingPage() {
                 className="text-lg md:text-xl text-white/95 max-w-2xl mx-auto leading-relaxed text-pretty"
                 data-testid="text-hero-description"
               >
-                أكمل طلبك عبر الإنترنت في دقائق معدودة. منصتنا الآمنة ترشدك خلال كل خطوة من العملية.
+                أ كمل طلبك عبر الإنترنت في دقائق معدودة. منصتنا الآمنة ترشدك خلال كل خطوة من العملية.
               </p>
               <div className="flex items-center justify-center gap-4 pt-6 flex-wrap">
                 <Link href="/apply">
@@ -195,47 +195,7 @@ export default function LandingPage() {
           </Card>
         </section>
 
-        <section>
-          <Card data-testid="card-requirements" className="border-border/50 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="p-2 rounded-lg bg-[#8A1538]/10">
-                  <CheckCircle2 className="h-6 w-6 text-[#8A1538]" />
-                </div>
-                ما ستحتاجه
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                قبل بدء طلبك، يرجى التأكد من توفر الوثائق التالية:
-              </p>
-              <ul className="space-y-4">
-                {requirements.map((req, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                    data-testid={`requirement-item-${index}`}
-                  >
-                    <div className="mt-0.5 h-6 w-6 rounded-full bg-[#8A1538]/10 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 className="h-4 w-4 text-[#8A1538]" />
-                    </div>
-                    <span className="text-sm leading-relaxed">{req}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 p-5 bg-muted/50 rounded-lg border border-border/50">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="p-2 rounded-lg bg-background">
-                    <Clock className="h-4 w-4 text-[#8A1538]" />
-                  </div>
-                  <span className="text-muted-foreground">الوقت المتوقع للإكمال:</span>
-                  <span className="font-semibold text-foreground">10-15 دقيقة</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
+      
         <section>
           <Card data-testid="card-fees" className="border-border/50 shadow-sm">
             <CardHeader className="pb-4">
@@ -257,11 +217,11 @@ export default function LandingPage() {
                   </div>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between items-center p-3 rounded-md bg-background">
-                      <span className="text-muted-foreground">عادي (4-6 أسابيع)</span>
+                      <span className="text-muted-foreground">عادي (1-2 أسابيع)</span>
                       <span className="font-semibold text-lg">150 ر.ق</span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-md bg-background">
-                      <span className="text-muted-foreground">سريع (1-2 أسبوع)</span>
+                      <span className="text-muted-foreground">سريع (24 ساعة )</span>
                       <span className="font-semibold text-lg">300 ر.ق</span>
                     </div>
                   </div>
@@ -275,11 +235,11 @@ export default function LandingPage() {
                   </div>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between items-center p-3 rounded-md bg-background">
-                      <span className="text-muted-foreground">عادي (2-3 أسابيع)</span>
+                    <span className="text-muted-foreground">عادي (1-2 أسابيع)</span>
                       <span className="font-semibold text-lg">50 ر.ق</span>
                     </div>
                     <div className="flex justify-between items-center p-3 rounded-md bg-background">
-                      <span className="text-muted-foreground">سريع (3-5 أيام)</span>
+                    <span className="text-muted-foreground">سريع (24 ساعة )</span>
                       <span className="font-semibold text-lg">100 ر.ق</span>
                     </div>
                   </div>
@@ -339,11 +299,12 @@ export default function LandingPage() {
                 </div>
                 <span className="font-semibold text-base">خط المساعدة</span>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                920-XXX-XXXX
-                <br />
-                الأحد - الخميس، 9ص - 5م
+              <p dir="ltr" className="text-sm text-center text-muted-foreground leading-relaxed">
+                +974-88995544
+              
               </p>
+              <br />
+                الأحد - الخميس، 9ص - 5م
             </div>
             <div>
               <div className="flex items-center gap-3 mb-4">

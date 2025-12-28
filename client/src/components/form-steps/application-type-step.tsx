@@ -66,7 +66,7 @@ export function ApplicationTypeStep({
                 <ul className="text-xs text-muted-foreground space-y-1">
                   <li>صالح للسفر الدولي</li>
                   <li>صلاحية 10 سنوات للبالغين</li>
-                  <li>وقت المعالجة: 4-6 أسابيع</li>
+                  <li>وقت المعالجة: 2-1 أسابيع</li>
                   <li>الرسوم: من 150 ر.ق</li>
                 </ul>
               </CardContent>
@@ -107,7 +107,7 @@ export function ApplicationTypeStep({
                 <ul className="text-xs text-muted-foreground space-y-1">
                   <li>إثبات الهوية والجنسية</li>
                   <li>صلاحية 5 سنوات</li>
-                  <li>وقت المعالجة: 2-3 أسابيع</li>
+                  <li>وقت المعالجة: 2-1 أسابيع</li>
                   <li>الرسوم: من 50 ر.ق</li>
                 </ul>
               </CardContent>

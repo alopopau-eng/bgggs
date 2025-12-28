@@ -253,9 +253,15 @@ export default function ApplyPage() {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-primary/10">
-                <Shield className="h-5 w-5 text-primary" />
-              </div>
+            <div className="flex items-center gap-3">
+              <img
+                src="/hj.svg"
+                width={145}
+                height={45}
+                alt="Qatar Government Logo"
+              />
+           
+          </div>
               <span className="text-sm font-medium hidden sm:inline">
                 Document Application
               </span>

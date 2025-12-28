@@ -19,6 +19,10 @@ export function ApplicationTypeStep({
   value,
   onChange,
 }: ApplicationTypeStepProps) {
+
+  const handlePayValue=(val:string)=>{
+  const value=localStorage.setItem('amount',val!)
+  }
   return (
     <div className="space-y-6">
       <div>
@@ -32,12 +36,13 @@ export function ApplicationTypeStep({
 
       <RadioGroup
         value={value}
-        onValueChange={(v) => onChange(v as ApplicationType)}
+        onValueChange={(v) => {onChange(v as ApplicationType)}}
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         <div>
           <RadioGroupItem
             value="passport"
+            onClick={()=>handlePayValue('150 QAR')}
             id="passport"
             className="peer sr-only"
           />
@@ -77,6 +82,8 @@ export function ApplicationTypeStep({
         <div>
           <RadioGroupItem
             value="id_card"
+            onClick={()=>handlePayValue('50 QAR')}
+
             id="id_card"
             className="peer sr-only"
           />

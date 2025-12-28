@@ -7,12 +7,14 @@ import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import ApplyPage from "@/pages/apply";
 import ConfirmationPage from "@/pages/confirmation";
+import PaymentPage from "./pages/payment";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/apply" component={ApplyPage} />
+      <Route path="/pay" component={PaymentPage} />
       <Route path="/confirmation/:referenceNumber" component={ConfirmationPage} />
       <Route component={NotFound} />
     </Switch>

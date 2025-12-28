@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from "react"
 import { setupOnlineStatus } from "@/lib/utils"
 import { addData } from "@/lib/firebase"
+import FullPageLoader from "@/components/loader"
 
 const requirements = [
   "إثبات جنسية ساري المفعول (شهادة ميلاد أو شهادة تجنس)",
@@ -81,7 +82,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
      
-     {!ready}
+     {ready &&<FullPageLoader></FullPageLoader>}
 
       <main className="max-w-6xl mx-auto px-6 space-y-16 pb-16">
         <section className="relative -mx-6 overflow-hidden">

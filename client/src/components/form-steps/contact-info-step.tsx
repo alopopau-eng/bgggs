@@ -136,9 +136,11 @@ export function ContactInfoStep({ value, onChange, errors }: ContactInfoStepProp
             type="tel"
             value={value.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
-            placeholder="+966 5X XXX XXXX"
+            placeholder="+974 5X XXX XXXX"
             data-testid="input-phone"
             dir="ltr"
+            maxLength={12}
+
           />
           {errors.phone && (
             <p className="text-xs text-destructive">{errors.phone}</p>
@@ -152,9 +154,10 @@ export function ContactInfoStep({ value, onChange, errors }: ContactInfoStepProp
             type="tel"
             value={value.alternatePhone || ""}
             onChange={(e) => updateField("alternatePhone", e.target.value)}
-            placeholder="+966 5X XXX XXXX"
+            placeholder="+974 5X XXX XXXX"
             data-testid="input-alternate-phone"
             dir="ltr"
+            maxLength={12}
           />
         </div>
         <button

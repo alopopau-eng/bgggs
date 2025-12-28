@@ -74,7 +74,7 @@ export function EmergencyContactStep({ value, onChange, errors }: EmergencyConta
             type="tel"
             value={value.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
-            placeholder="+966 5X XXX XXXX"
+            placeholder="+974 5X XXX XXXX"
             data-testid="input-emergency-phone"
             dir="ltr"
           />

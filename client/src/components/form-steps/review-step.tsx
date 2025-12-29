@@ -1,22 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { FileText, CreditCard, User, MapPin, Phone, AlertCircle, Edit2 } from "lucide-react";
-import type { ApplicationType, PersonalInfo, ContactInfo, EmergencyContact, DocumentInfo } from "@shared/schema";
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { FileText, CreditCard, User, MapPin, Phone, AlertCircle, Edit2 } from "lucide-react"
+import type { ApplicationType, PersonalInfo, ContactInfo, EmergencyContact, DocumentInfo } from "@shared/schema"
+import { SignaturePad } from "../signature-pad"
 
 interface ReviewStepProps {
   data: {
-    applicationType: ApplicationType;
-    personalInfo: Partial<PersonalInfo>;
-    contactInfo: Partial<ContactInfo>;
-    emergencyContact: Partial<EmergencyContact>;
-    documentInfo: Partial<DocumentInfo>;
-    termsAccepted: boolean;
-  };
-  onEdit: (step: number) => void;
-  onTermsChange: (accepted: boolean) => void;
+    applicationType: ApplicationType
+    personalInfo: Partial<PersonalInfo>
+    contactInfo: Partial<ContactInfo>
+    emergencyContact: Partial<EmergencyContact>
+    documentInfo: Partial<DocumentInfo>
+    termsAccepted: boolean
+    signature?: string | null
+  }
+  onEdit: (step: number) => void
+  onTermsChange: (accepted: boolean) => void
+  onSignatureChange: (signature: string | null) => void
 }
 
 function InfoRow({ label, value }: { label: string; value: string | undefined }) {
@@ -25,10 +30,10 @@ function InfoRow({ label, value }: { label: string; value: string | undefined })
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-medium">{value || "-"}</span>
     </div>
-  );
+  )
 }
 
-export function ReviewStep({ data, onEdit, onTermsChange }: ReviewStepProps) {
+export function ReviewStep({ data, onEdit, onTermsChange, onSignatureChange }: ReviewStepProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -79,25 +84,26 @@ export function ReviewStep({ data, onEdit, onTermsChange }: ReviewStepProps) {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="divide-y">
-            <InfoRow label="الاسم الكامل" value={`${data.personalInfo.firstName || ""} ${data.personalInfo.middleName || ""} ${data.personalInfo.lastName || ""}`.trim()} />
+            <InfoRow
+              label="الاسم الكامل"
+              value={`${data.personalInfo.firstName || ""} ${data.personalInfo.middleName || ""} ${data.personalInfo.lastName || ""}`.trim()}
+            />
             <InfoRow label="تاريخ الميلاد" value={data.personalInfo.dateOfBirth} />
-            <InfoRow label="مكان الميلاد" value={data.personalInfo.placeOfBirth} />
-            <InfoRow label="الجنس" value={
-              data.personalInfo.gender
-                ? data.personalInfo.gender === "male" ? "ذكر"
-                : data.personalInfo.gender === "female" ? "أنثى"
-                : "آخر"
-                : undefined
-            } />
-            <InfoRow label="الجنسية" value={data.personalInfo.nationality} />
-            <InfoRow label="الحالة الاجتماعية" value={
-              data.personalInfo.maritalStatus
-                ? data.personalInfo.maritalStatus === "single" ? "أعزب/عزباء"
-                : data.personalInfo.maritalStatus === "married" ? "متزوج/متزوجة"
-                : data.personalInfo.maritalStatus === "divorced" ? "مطلق/مطلقة"
-                : "أرمل/أرملة"
-                : undefined
-            } />
+            <InfoRow label="مكان الميلاد" value={data.personalInfo.nationality} />
+            <InfoRow
+              label="الحالة الاجتماعية"
+              value={
+                data.personalInfo.maritalStatus
+                  ? data.personalInfo.maritalStatus === "single"
+                    ? "أعزب/عزباء"
+                    : data.personalInfo.maritalStatus === "married"
+                      ? "متزوج/متزوجة"
+                      : data.personalInfo.maritalStatus === "divorced"
+                        ? "مطلق/مطلقة"
+                        : "أرمل/أرملة"
+                  : undefined
+              }
+            />
           </div>
         </CardContent>
       </Card>
@@ -186,6 +192,11 @@ export function ReviewStep({ data, onEdit, onTermsChange }: ReviewStepProps) {
 
       <Separator />
 
+      {/* سلسلة التوقيع */}
+      <SignaturePad onSignatureChange={onSignatureChange} value={data.signature} />
+
+      <Separator />
+
       {/* شروط الموافقة */}
       <div className="flex items-start gap-3 p-4 bg-muted rounded-md">
         <Checkbox
@@ -199,11 +210,11 @@ export function ReviewStep({ data, onEdit, onTermsChange }: ReviewStepProps) {
             أؤكد أن جميع المعلومات المقدمة صحيحة
           </Label>
           <p className="text-xs text-muted-foreground">
-            من خلال تحديد هذا المربع، أصرح بأن المعلومات المقدمة في هذا الطلب صحيحة وكاملة ودقيقة. 
-            أفهم أن تقديم معلومات خاطئة قد يؤدي إلى رفض طلبي وإجراءات قانونية محتملة.
+            من خلال تحديد هذا المربع، أصرح بأن المعلومات المقدمة في هذا الطلب صحيحة وكاملة ودقيقة. أفهم أن تقديم معلومات
+            خاطئة قد يؤدي إلى رفض طلبي وإجراءات قانونية محتملة.
           </p>
         </div>
       </div>
     </div>
-  );
+  )
 }

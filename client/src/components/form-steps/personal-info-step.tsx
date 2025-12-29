@@ -116,7 +116,7 @@ export function PersonalInfoStep({
             </p>
           )}
         </div>
-        <div className="space-y-2">
+       {/* {} <div className="space-y-2">
         <Label htmlFor="firstName">
           مدة الاصدار<span className="text-destructive">*</span>
           </Label>
@@ -133,7 +133,7 @@ export function PersonalInfoStep({
       ))}
             </SelectContent>
         </Select>
-        </div>
+        </div> */}
 
         {/* الاسم الأول */}
         <div className="space-y-2">

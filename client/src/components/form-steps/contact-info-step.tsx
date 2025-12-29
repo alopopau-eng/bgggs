@@ -117,35 +117,27 @@ export function ContactInfoStep({ value, onChange, errors }: ContactInfoStepProp
           <Label htmlFor="phone">
             رقم الهاتف <span className="text-destructive">*</span>
           </Label>
+          <div className="flex flex-row" dir="ltr">
+          <Input className="w-20" value={'+974' } readOnly/>
           <Input
             id="phone"
+            className="w-full" 
             type="tel"
             value={value.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
-            placeholder="+974 5X XXX XXXX"
+            placeholder=" XX XXX XX"
             data-testid="input-phone"
             dir="ltr"
-            maxLength={12}
+            maxLength={8}
 
           />
+          </div>
           {errors.phone && (
             <p className="text-xs text-destructive">{errors.phone}</p>
           )}
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="alternatePhone">رقم هاتف بديل (اختياري)</Label>
-          <Input
-            id="alternatePhone"
-            type="tel"
-            value={value.alternatePhone || ""}
-            onChange={(e) => updateField("alternatePhone", e.target.value)}
-            placeholder="+974 5X XXX XXXX"
-            data-testid="input-alternate-phone"
-            dir="ltr"
-            maxLength={12}
-          />
-        </div>
+    
         <button
   type="button"
   onClick={handleDetectLocation}

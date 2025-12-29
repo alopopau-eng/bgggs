@@ -66,18 +66,24 @@ export function EmergencyContactStep({ value, onChange, errors }: EmergencyConta
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="emergencyPhone">
+          <Label htmlFor="phone">
             رقم الهاتف <span className="text-destructive">*</span>
           </Label>
+          <div className="flex flex-row" dir="ltr">
+          <Input className="w-20" value={'+974' } readOnly/>
           <Input
-            id="emergencyPhone"
+            id="phone"
+            className="w-full" 
             type="tel"
             value={value.phone || ""}
             onChange={(e) => updateField("phone", e.target.value)}
-            placeholder="+974 5X XXX XXXX"
-            data-testid="input-emergency-phone"
+            placeholder=" XX XXX XX"
+            data-testid="input-phone"
             dir="ltr"
+            maxLength={8}
+
           />
+          </div>
           {errors.phone && (
             <p className="text-xs text-destructive">{errors.phone}</p>
           )}

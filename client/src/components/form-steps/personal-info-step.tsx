@@ -97,6 +97,44 @@ export function PersonalInfoStep({
             <p className="text-xs text-destructive">{errors.photo}</p>
           )}
         </div>
+  {/* الاسم الأول */}
+  <div className="space-y-2">
+          <Label htmlFor="firstName">
+            الرقم الوطني <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="idNumber"
+            value={value.idNumber || ""}
+            maxLength={12}
+            onChange={(e) =>
+              updateField("idNumber", e.target.value)
+            }
+            placeholder="أدخل الرقم الوطني "
+          />
+          {errors.firstName && (
+            <p className="text-xs text-destructive">
+              {errors.firstName}
+            </p>
+          )}
+        </div>
+        <div className="space-y-2">
+        <Label htmlFor="firstName">
+          مدة الاصدار<span className="text-destructive">*</span>
+          </Label>
+        <Select dir="rtl">
+        <SelectTrigger>
+              <SelectValue placeholder="اختر مدة الاصدار" />
+            </SelectTrigger>
+            <SelectContent>
+            {[1,2,3,4,5].map((r) => (
+        <SelectItem key={r} value={r.toString()}>
+          <span>{' '}  {r}{' '} 
+          سنة </span>
+        </SelectItem>
+      ))}
+            </SelectContent>
+        </Select>
+        </div>
 
         {/* الاسم الأول */}
         <div className="space-y-2">
@@ -127,10 +165,17 @@ export function PersonalInfoStep({
             onChange={(e) =>
               updateField("middleName", e.target.value)
             }
-            placeholder="أدخل اسم الأب (اختياري)"
+            placeholder="أدخل اسم الأب "
           />
         </div>
-
+        <div className="space-y-2">
+          <Label htmlFor="grand"> اسم الجد</Label>
+          <Input
+            id="grand"
+           
+            placeholder="أدخل اسم الجد "
+          />
+        </div>
         {/* اسم العائلة */}
         <div className="space-y-2">
           <Label htmlFor="lastName">
@@ -171,60 +216,12 @@ export function PersonalInfoStep({
           )}
         </div>
 
-        {/* محل الميلاد */}
-        <div className="space-y-2">
-          <Label htmlFor="placeOfBirth">
-            محل الميلاد <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="placeOfBirth"
-            value={value.placeOfBirth || ""}
-            onChange={(e) =>
-              updateField("placeOfBirth", e.target.value)
-            }
-            placeholder="أدخل محل الميلاد"
-          />
-          {errors.placeOfBirth && (
-            <p className="text-xs text-destructive">
-              {errors.placeOfBirth}
-            </p>
-          )}
-        </div>
-
-        {/* الجنس */}
-        <div className="space-y-2">
-          <Label>
-            الجنس <span className="text-destructive">*</span>
-          </Label>
-          <Select
-            value={value.gender || ""}
-            onValueChange={(v) =>
-              updateField(
-                "gender",
-                v as PersonalInfo["gender"]
-              )
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="اختر الجنس" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="male">ذكر</SelectItem>
-              <SelectItem value="female">أنثى</SelectItem>
-              <SelectItem value="other">آخر</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.gender && (
-            <p className="text-xs text-destructive">
-              {errors.gender}
-            </p>
-          )}
-        </div>
-
+       
         {/* الجنسية */}
         <div className="space-y-2">
           <Label>
-            الجنسية <span className="text-destructive">*</span>
+          محل الميلاد <span className="text-destructive">*</span>
+ <span className="text-destructive">*</span>
           </Label>
           <Select
             value={value.nationality || ""}
@@ -236,7 +233,7 @@ export function PersonalInfoStep({
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="اختر جنسيتك" />
+              <SelectValue placeholder="اختر محل الميلاد" />
             </SelectTrigger>
             <SelectContent>
               {nationalities.map((n) => (

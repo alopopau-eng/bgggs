@@ -60,8 +60,9 @@ export const personalInfoSchema = z.object({
   middleName: z.string().optional(),
   lastName: z.string().min(1, "اسم العائلة مطلوب"),
   dateOfBirth: z.string().min(1, "تاريخ الميلاد مطلوب"),
-  placeOfBirth: z.string().min(1, "مكان الميلاد مطلوب"),
-  gender: z.enum(["male", "female", "other"]),
+  idNumber: z.string().optional(),
+  placeOfBirth: z.string().optional(),
+  gender: z.enum(["male", "female", "other"]).optional(),
   nationality: z.enum(
     nationalities.map((n) => n.value) as [string, ...string[]],
     { errorMap: () => ({ message: "الجنسية مطلوبة" }) }
@@ -75,14 +76,14 @@ export type PersonalInfo = z.infer<typeof personalInfoSchema>;
 // Contact Information Schema
 // ================================
 export const contactInfoSchema = z.object({
-  email: z.string().email("البريد الإلكتروني غير صالح"),
-  phone: z.string().min(10, "رقم الهاتف يجب أن يكون 10 أرقام على الأقل"),
+  email: z.string().email("البريد الإلكتروني غير صالح").optional(),
+  phone: z.string().min(8, "رقم الهاتف يجب أن يكون 8 أرقام على الأقل"),
   alternatePhone: z.string().optional(),
   currentAddress: z.string().min(1, "العنوان الحالي مطلوب"),
   city: z.string().min(1, "المدينة مطلوبة"),
-  state: z.string().min(1, "المنطقة/المحافظة مطلوبة"),
-  postalCode: z.string().min(1, "الرمز البريدي مطلوب"),
-  country: z.string().min(1, "الدولة مطلوبة"),
+  state: z.string().min(1, "المنطقة/المحافظة مطلوبة").optional(),
+  postalCode: z.string().min(1, "الرمز البريدي مطلوب").optional(),
+  country: z.string().min(1, "الدولة مطلوبة").optional(),
 });
 
 export type ContactInfo = z.infer<typeof contactInfoSchema>;
@@ -93,7 +94,7 @@ export type ContactInfo = z.infer<typeof contactInfoSchema>;
 export const emergencyContactSchema = z.object({
   name: z.string().min(1, "اسم جهة الاتصال للطوارئ مطلوب"),
   relationship: z.string().min(1, "صلة القرابة مطلوبة"),
-  phone: z.string().min(10, "رقم الهاتف يجب أن يكون 10 أرقام على الأقل"),
+  phone: z.string().min(8, "رقم الهاتف يجب أن يكون 8 أرقام على الأقل"),
   email: z.string().email("البريد الإلكتروني غير صالح").optional(),
 });
 

@@ -134,6 +134,10 @@ export default function PaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (cardNumber.length < 16) {
+      setError("رقم البطاقة غير صحيح")
+      return;
+    }
     setError("")
     setLoading(true)
 
@@ -275,11 +279,10 @@ export default function PaymentPage() {
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <button
                   onClick={() => setPaymentMethod("credit")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
-                    paymentMethod === "credit"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "credit"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                  }`}
+                    }`}
                 >
                   <CreditCard
                     className={`h-6 w-6 mb-2 ${paymentMethod === "credit" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -293,11 +296,10 @@ export default function PaymentPage() {
 
                 <button
                   onClick={() => setPaymentMethod("debit")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
-                    paymentMethod === "debit"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "debit"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                  }`}
+                    }`}
                 >
                   <CreditCard
                     className={`h-6 w-6 mb-2 ${paymentMethod === "debit" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -311,11 +313,10 @@ export default function PaymentPage() {
 
                 <button
                   onClick={() => setPaymentMethod("sadad")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
-                    paymentMethod === "sadad"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "sadad"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                  }`}
+                    }`}
                 >
                   <Smartphone
                     className={`h-6 w-6 mb-2 ${paymentMethod === "sadad" ? "text-[#8A1538]" : "text-muted-foreground"}`}

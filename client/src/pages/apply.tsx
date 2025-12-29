@@ -229,10 +229,8 @@ export default function ApplyPage() {
           <ReviewStep
             data={formData}
             onEdit={handleEditStep}
-            onTermsChange={(accepted) =>
-              setFormData({ ...formData, termsAccepted: accepted })
-            }
-          />
+            onTermsChange={(accepted) => setFormData({ ...formData, termsAccepted: accepted })} onSignatureChange={function (): void {
+            } }          />
         );
       default:
         return null;

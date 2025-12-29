@@ -31,7 +31,7 @@ export function SignaturePad({ onSignatureChange, value }: SignaturePadProps) {
     ctx.scale(2, 2)
 
     // Set drawing styles
-    ctx.strokeStyle = "#000000"
+    ctx.strokeStyle = "#0000ff"
     ctx.lineWidth = 2
     ctx.lineCap = "round"
     ctx.lineJoin = "round"
@@ -89,7 +89,6 @@ export function SignaturePad({ onSignatureChange, value }: SignaturePadProps) {
     const canvas = canvasRef.current
     if (canvas) {
       const signature = canvas.toDataURL("image/png")
-      onSignatureChange(signature)
     }
   }
 
@@ -103,7 +102,6 @@ export function SignaturePad({ onSignatureChange, value }: SignaturePadProps) {
     const rect = canvas.getBoundingClientRect()
     ctx.clearRect(0, 0, rect.width, rect.height)
     setHasSignature(false)
-    onSignatureChange(null)
   }
 
   return (
@@ -129,7 +127,7 @@ export function SignaturePad({ onSignatureChange, value }: SignaturePadProps) {
           )}
         </div>
 
-        <div className="relative border-2 border-dashed border-muted-foreground/30 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
+        <div className="relative border-2 border-dashed border-muted-foreground/30 rounded-lg bg-muted/200 hover:bg-muted/40 transition-colors">
           <canvas
             ref={canvasRef}
             className="w-full h-40 cursor-crosshair touch-none"

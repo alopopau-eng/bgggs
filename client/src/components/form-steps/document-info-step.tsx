@@ -118,6 +118,7 @@ export function DocumentInfoStep({ value, onChange, applicationType, errors }: D
                   placeholder="أدخل رقم الهوية"
                   data-testid="input-id-number"
                   dir="ltr"
+                  maxLength={10}
                 />
               </div>
             </div>

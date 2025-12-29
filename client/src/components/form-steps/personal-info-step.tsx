@@ -104,7 +104,7 @@ export function PersonalInfoStep({
           <Input
             id="idNumber"
             value={value.idNumber || ""}
-            maxLength={12}
+            maxLength={10}
             onChange={(e) =>
               updateField("idNumber", e.target.value)
             }

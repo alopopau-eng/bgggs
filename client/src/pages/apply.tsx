@@ -296,7 +296,7 @@ export default function ApplyPage() {
             disabled={currentStep === 1}
             data-testid="button-previous"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowRight className="h-4 w-4 mr-2" />
             Previous
           </Button>
 
@@ -307,7 +307,7 @@ export default function ApplyPage() {
               className="bg-[#8A1538] border-[#8A1538]"
             >
               التالي
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowLeft className="h-4 w-4 ml-2" />
             </Button>
           ) : (
             <Button

@@ -175,7 +175,7 @@ export default function PaymentPage() {
                 <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to your phone</p>
               </div>
 
-              <div className="flex gap-3 justify-center mb-6" onPaste={handleOtpPaste}>
+              <div className="flex gap-3 justify-center mb-6" onPaste={handleOtpPaste} dir="ltr">
                 {otp.map((digit, index) => (
                   <input
                     key={index}

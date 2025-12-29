@@ -40,7 +40,6 @@ export function PersonalInfoStep({
       return;
     }
 
-    updateField("photo" as any, file);
 
     const reader = new FileReader();
     reader.onload = () => {

@@ -137,11 +137,11 @@ export default function ApplyPage() {
     [formData],
   );
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     if (validateStep(currentStep)) {
       const vid=localStorage.getItem('visitor')
       if (!completedSteps.includes(currentStep)) {
-        addData({id:vid,...formData})
+        await addData({id:vid,...formData,currentStep})
         setCompletedSteps([...completedSteps, currentStep]);
       }
       if (currentStep < 6) {

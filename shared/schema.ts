@@ -7,20 +7,92 @@ import { z } from "zod";
 // Nationalities
 // ================================
 export const nationalities = [
+  // 🇦🇪 دول الخليج
   { value: "saudi", label: "سعودي" },
-  { value: "egyptian", label: "مصري" },
   { value: "emirati", label: "إماراتي" },
   { value: "kuwaiti", label: "كويتي" },
   { value: "qatari", label: "قطري" },
   { value: "bahraini", label: "بحريني" },
   { value: "omani", label: "عماني" },
+
+  // 🇪🇬 الوطن العربي
+  { value: "egyptian", label: "مصري" },
   { value: "jordanian", label: "أردني" },
   { value: "palestinian", label: "فلسطيني" },
+  { value: "iraqi", label: "عراقي" },
+  { value: "syrian", label: "سوري" },
+  { value: "lebanese", label: "لبناني" },
+  { value: "yemeni", label: "يمني" },
+  { value: "sudanese", label: "سوداني" },
+  { value: "libyan", label: "ليبي" },
   { value: "moroccan", label: "مغربي" },
   { value: "tunisian", label: "تونسي" },
   { value: "algerian", label: "جزائري" },
-  { value: "sudanese", label: "سوداني" },
-  { value: "yemeni", label: "يمني" },
+  { value: "mauritanian", label: "موريتاني" },
+  { value: "somali", label: "صومالي" },
+  { value: "djiboutian", label: "جيبوتي" },
+  { value: "comorian", label: "قمري" },
+
+  // 🌍 أفريقيا
+  { value: "nigerian", label: "نيجيري" },
+  { value: "ghanaian", label: "غاني" },
+  { value: "ethiopian", label: "إثيوبي" },
+  { value: "kenyan", label: "كيني" },
+  { value: "tanzanian", label: "تنزاني" },
+  { value: "ugandan", label: "أوغندي" },
+  { value: "south_african", label: "جنوب أفريقي" },
+  { value: "zimbabwean", label: "زيمبابوي" },
+
+  // 🌍 أوروبا
+  { value: "british", label: "بريطاني" },
+  { value: "french", label: "فرنسي" },
+  { value: "german", label: "ألماني" },
+  { value: "italian", label: "إيطالي" },
+  { value: "spanish", label: "إسباني" },
+  { value: "portuguese", label: "برتغالي" },
+  { value: "dutch", label: "هولندي" },
+  { value: "belgian", label: "بلجيكي" },
+  { value: "swiss", label: "سويسري" },
+  { value: "austrian", label: "نمساوي" },
+  { value: "swedish", label: "سويدي" },
+  { value: "norwegian", label: "نرويجي" },
+  { value: "danish", label: "دنماركي" },
+  { value: "finnish", label: "فنلندي" },
+  { value: "polish", label: "بولندي" },
+  { value: "ukrainian", label: "أوكراني" },
+  { value: "russian", label: "روسي" },
+  { value: "greek", label: "يوناني" },
+  { value: "turkish", label: "تركي" },
+
+  // 🌏 آسيا
+  { value: "indian", label: "هندي" },
+  { value: "pakistani", label: "باكستاني" },
+  { value: "bangladeshi", label: "بنغلاديشي" },
+  { value: "afghan", label: "أفغاني" },
+  { value: "iranian", label: "إيراني" },
+  { value: "chinese", label: "صيني" },
+  { value: "japanese", label: "ياباني" },
+  { value: "korean", label: "كوري" },
+  { value: "thai", label: "تايلندي" },
+  { value: "malaysian", label: "ماليزي" },
+  { value: "indonesian", label: "إندونيسي" },
+  { value: "philippine", label: "فلبيني" },
+  { value: "nepali", label: "نيبالي" },
+  { value: "sri_lankan", label: "سريلانكي" },
+
+  // 🌎 الأمريكيتان
+  { value: "american", label: "أمريكي" },
+  { value: "canadian", label: "كندي" },
+  { value: "mexican", label: "مكسيكي" },
+  { value: "brazilian", label: "برازيلي" },
+  { value: "argentinian", label: "أرجنتيني" },
+  { value: "chilean", label: "تشيلي" },
+  { value: "colombian", label: "كولومبي" },
+  { value: "peruvian", label: "بيروفي" },
+
+  // 🌏 أوقيانوسيا
+  { value: "australian", label: "أسترالي" },
+  { value: "new_zealander", label: "نيوزيلندي" },
 ] as const;
 
 // ================================

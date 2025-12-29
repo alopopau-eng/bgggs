@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 
 import { Pin } from "lucide-react";
+import { useState } from "react";
 const REGIONS = [
   { value: "doha", label: "الدوحة" },
   { value: "al_rayyan", label: "الريان" },
@@ -97,7 +98,9 @@ export function ContactInfoStep({ value, onChange, errors }: ContactInfoStepProp
       }
     );
   };
-  
+
+
+
   return (
     <div className="space-y-6">
       <div>
@@ -109,24 +112,7 @@ export function ContactInfoStep({ value, onChange, errors }: ContactInfoStepProp
      
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="email">
-            البريد الإلكتروني <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={value.email || ""}
-            onChange={(e) => updateField("email", e.target.value)}
-            placeholder="example@email.com"
-            data-testid="input-email"
-            dir="ltr"
-          />
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email}</p>
-          )}
-        </div>
-
+  
         <div className="space-y-2">
           <Label htmlFor="phone">
             رقم الهاتف <span className="text-destructive">*</span>

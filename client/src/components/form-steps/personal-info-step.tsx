@@ -1,6 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { nationalities, type PersonalInfo } from "@shared/schema";
 
 interface PersonalInfoStepProps {
@@ -9,22 +18,87 @@ interface PersonalInfoStepProps {
   errors: Record<string, string>;
 }
 
+export function PersonalInfoStep({
+  value,
+  onChange,
+  errors,
+}: PersonalInfoStepProps) {
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-export function PersonalInfoStep({ value, onChange, errors }: PersonalInfoStepProps) {
-  const updateField = <K extends keyof PersonalInfo>(field: K, val: PersonalInfo[K]) => {
+  const updateField = <K extends keyof PersonalInfo>(
+    field: K,
+    val: PersonalInfo[K]
+  ) => {
     onChange({ ...value, [field]: val });
+  };
+
+  const handlePhotoUpload = (file?: File) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("يرجى اختيار صورة فقط");
+      return;
+    }
+
+    updateField("photo" as any, file);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
     <div className="space-y-6">
+      {/* العنوان */}
       <div>
-        <h2 className="text-xl font-semibold text-foreground">البيانات الشخصية</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          البيانات الشخصية
+        </h2>
         <p className="text-sm text-muted-foreground mt-1">
           يرجى إدخال بياناتك الشخصية كما تظهر في الوثائق الرسمية
         </p>
       </div>
 
+      {/* المحتوى */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* الصورة الشخصية */}
+        <div className="space-y-2 md:col-span-2">
+          <Label>
+            الصورة الشخصية <span className="text-destructive">*</span>
+          </Label>
+
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 rounded-full border flex items-center justify-center overflow-hidden bg-muted">
+              {photoPreview ? (
+                <img
+                  src={photoPreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  لا توجد صورة
+                </span>
+              )}
+            </div>
+
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                handlePhotoUpload(e.target.files?.[0])
+              }
+            />
+          </div>
+
+          {errors.photo && (
+            <p className="text-xs text-destructive">{errors.photo}</p>
+          )}
+        </div>
+
+        {/* الاسم الأول */}
         <div className="space-y-2">
           <Label htmlFor="firstName">
             الاسم الأول <span className="text-destructive">*</span>
@@ -32,26 +106,32 @@ export function PersonalInfoStep({ value, onChange, errors }: PersonalInfoStepPr
           <Input
             id="firstName"
             value={value.firstName || ""}
-            onChange={(e) => updateField("firstName", e.target.value)}
+            onChange={(e) =>
+              updateField("firstName", e.target.value)
+            }
             placeholder="أدخل الاسم الأول"
-            data-testid="input-first-name"
           />
           {errors.firstName && (
-            <p className="text-xs text-destructive">{errors.firstName}</p>
+            <p className="text-xs text-destructive">
+              {errors.firstName}
+            </p>
           )}
         </div>
 
+        {/* اسم الأب */}
         <div className="space-y-2">
           <Label htmlFor="middleName">اسم الأب</Label>
           <Input
             id="middleName"
             value={value.middleName || ""}
-            onChange={(e) => updateField("middleName", e.target.value)}
+            onChange={(e) =>
+              updateField("middleName", e.target.value)
+            }
             placeholder="أدخل اسم الأب (اختياري)"
-            data-testid="input-middle-name"
           />
         </div>
 
+        {/* اسم العائلة */}
         <div className="space-y-2">
           <Label htmlFor="lastName">
             اسم العائلة <span className="text-destructive">*</span>
@@ -59,15 +139,19 @@ export function PersonalInfoStep({ value, onChange, errors }: PersonalInfoStepPr
           <Input
             id="lastName"
             value={value.lastName || ""}
-            onChange={(e) => updateField("lastName", e.target.value)}
+            onChange={(e) =>
+              updateField("lastName", e.target.value)
+            }
             placeholder="أدخل اسم العائلة"
-            data-testid="input-last-name"
           />
           {errors.lastName && (
-            <p className="text-xs text-destructive">{errors.lastName}</p>
+            <p className="text-xs text-destructive">
+              {errors.lastName}
+            </p>
           )}
         </div>
 
+        {/* تاريخ الميلاد */}
         <div className="space-y-2">
           <Label htmlFor="dateOfBirth">
             تاريخ الميلاد <span className="text-destructive">*</span>
@@ -76,40 +160,52 @@ export function PersonalInfoStep({ value, onChange, errors }: PersonalInfoStepPr
             id="dateOfBirth"
             type="date"
             value={value.dateOfBirth || ""}
-            onChange={(e) => updateField("dateOfBirth", e.target.value)}
-            data-testid="input-dob"
+            onChange={(e) =>
+              updateField("dateOfBirth", e.target.value)
+            }
           />
           {errors.dateOfBirth && (
-            <p className="text-xs text-destructive">{errors.dateOfBirth}</p>
+            <p className="text-xs text-destructive">
+              {errors.dateOfBirth}
+            </p>
           )}
         </div>
 
+        {/* محل الميلاد */}
         <div className="space-y-2">
-  <Label htmlFor="placeOfBirth">
-    محل الميلاد <span className="text-destructive">*</span>
-  </Label>
-  <Input
-    id="placeOfBirth"
-    value={value.placeOfBirth || ""}
-    onChange={(e) => updateField("placeOfBirth", e.target.value)}
-    placeholder="أدخل محل الميلاد"
-    data-testid="input-place-of-birth"
-  />
-  {errors.placeOfBirth && (
-    <p className="text-xs text-destructive">{errors.placeOfBirth}</p>
-  )}
-</div>
+          <Label htmlFor="placeOfBirth">
+            محل الميلاد <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="placeOfBirth"
+            value={value.placeOfBirth || ""}
+            onChange={(e) =>
+              updateField("placeOfBirth", e.target.value)
+            }
+            placeholder="أدخل محل الميلاد"
+          />
+          {errors.placeOfBirth && (
+            <p className="text-xs text-destructive">
+              {errors.placeOfBirth}
+            </p>
+          )}
+        </div>
 
-
+        {/* الجنس */}
         <div className="space-y-2">
-          <Label htmlFor="gender">
+          <Label>
             الجنس <span className="text-destructive">*</span>
           </Label>
           <Select
             value={value.gender || ""}
-            onValueChange={(v) => updateField("gender", v as PersonalInfo["gender"])}
+            onValueChange={(v) =>
+              updateField(
+                "gender",
+                v as PersonalInfo["gender"]
+              )
+            }
           >
-            <SelectTrigger id="gender" data-testid="select-gender">
+            <SelectTrigger>
               <SelectValue placeholder="اختر الجنس" />
             </SelectTrigger>
             <SelectContent>
@@ -119,47 +215,59 @@ export function PersonalInfoStep({ value, onChange, errors }: PersonalInfoStepPr
             </SelectContent>
           </Select>
           {errors.gender && (
-            <p className="text-xs text-destructive">{errors.gender}</p>
+            <p className="text-xs text-destructive">
+              {errors.gender}
+            </p>
           )}
         </div>
+
+        {/* الجنسية */}
         <div className="space-y-2">
-  <Label htmlFor="nationality">
-    الجنسية <span className="text-destructive">*</span>
-  </Label>
+          <Label>
+            الجنسية <span className="text-destructive">*</span>
+          </Label>
+          <Select
+            value={value.nationality || ""}
+            onValueChange={(v) =>
+              updateField(
+                "nationality",
+                v as PersonalInfo["nationality"]
+              )
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="اختر جنسيتك" />
+            </SelectTrigger>
+            <SelectContent>
+              {nationalities.map((n) => (
+                <SelectItem key={n.value} value={n.value}>
+                  {n.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.nationality && (
+            <p className="text-xs text-destructive">
+              {errors.nationality}
+            </p>
+          )}
+        </div>
 
-  <Select
-    value={value.nationality || ""}
-    onValueChange={(val) =>
-      updateField("nationality", val as PersonalInfo["nationality"])
-    }
-  >
-    <SelectTrigger id="nationality" data-testid="select-nationality">
-      <SelectValue placeholder="اختر جنسيتك" />
-    </SelectTrigger>
-
-    <SelectContent>
-      {nationalities.map((n) => (
-        <SelectItem key={n.value} value={n.value}>
-          {n.label}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-
-  {errors.nationality && (
-    <p className="text-xs text-destructive">{errors.nationality}</p>
-  )}
-</div>
-
+        {/* الحالة الاجتماعية */}
         <div className="space-y-2">
-          <Label htmlFor="maritalStatus">
+          <Label>
             الحالة الاجتماعية <span className="text-destructive">*</span>
           </Label>
           <Select
             value={value.maritalStatus || ""}
-            onValueChange={(v) => updateField("maritalStatus", v as PersonalInfo["maritalStatus"])}
+            onValueChange={(v) =>
+              updateField(
+                "maritalStatus",
+                v as PersonalInfo["maritalStatus"]
+              )
+            }
           >
-            <SelectTrigger id="maritalStatus" data-testid="select-marital-status">
+            <SelectTrigger>
               <SelectValue placeholder="اختر الحالة الاجتماعية" />
             </SelectTrigger>
             <SelectContent>
@@ -170,7 +278,9 @@ export function PersonalInfoStep({ value, onChange, errors }: PersonalInfoStepPr
             </SelectContent>
           </Select>
           {errors.maritalStatus && (
-            <p className="text-xs text-destructive">{errors.maritalStatus}</p>
+            <p className="text-xs text-destructive">
+              {errors.maritalStatus}
+            </p>
           )}
         </div>
       </div>

